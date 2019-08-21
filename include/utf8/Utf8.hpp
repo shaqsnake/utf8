@@ -3,14 +3,22 @@
  * @Author: shaqsnake
  * @Email: shaqsnake@gmail.com
  * @Date: 2019-08-20 14:41:18
- * @LastEditTime: 2019-08-20 14:53:22
+ * @LastEditTime: 2019-08-21 14:30:28
  * @Description: A declaration of class utf8::Utf8.
  */
 
 #ifndef UTF8_UTF8_HPP
 #define UTF8_UTF8_HPP
 
+#include <cstdint>
+#include <vector>
+
 namespace utf8 {
+
+typedef uint32_t UnicodeUnit;
+typedef uint8_t Utf8Unit;
+
+std::vector<UnicodeUnit> asciiToUnicode(const std::string &asciis);
 
 class Utf8 {
 public:
@@ -20,9 +28,9 @@ public:
     Utf8(Utf8 &&) = delete;
     Utf8 &operator=(const Utf8 &) = delete;
     Utf8 &operator=(Utf8 &&) = delete;
-    
+
 public:
-    int foo();
+    std::vector<Utf8Unit> encode(const std::vector<UnicodeUnit>& unicodes);
 };
 
 
