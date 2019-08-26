@@ -3,7 +3,7 @@
  * @Author: shaqsnake
  * @Email: shaqsnake@gmail.com
  * @Date: 2019-08-20 14:41:29
- * @LastEditTime: 2019-08-21 16:31:24
+ * @LastEditTime: 2019-08-22 15:55:39
  * @Description: An implementation of class utf8::Utf8.
  */
 
@@ -15,7 +15,7 @@ namespace {
         size_t bits = 0;
         while (codePoint) {
             bits++;
-            codePoint = codePoint >> 1;
+            codePoint >>= 1;
         }
 
         return bits;
