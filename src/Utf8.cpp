@@ -11,7 +11,15 @@
 #include <utf8/Utf8.hpp>
 
 namespace {
-    size_t calulateBits(utf8::UnicodeUnit codePoint) {
+    /**
+     * @description:
+     *     Calculate how many bits in a unicode code point.
+     * @param[in] codePoint
+     *     A code point of unicode.
+     * @return:
+     *     The num of bits is returned.
+     */
+    size_t calculateBits(utf8::UnicodeUnit codePoint) {
         size_t bits = 0;
         while (codePoint) {
             bits++;
@@ -46,7 +54,7 @@ std::vector<UnicodeUnit> asciiToUnicode(const std::string &asciis) {
 std::vector<Utf8Unit> Utf8::encode(const std::vector<UnicodeUnit> &unicodes) {
     std::vector<Utf8Unit> res;
     for (auto const unicode : unicodes) {
-        const auto bits = calulateBits(unicode);
+        const auto bits = calculateBits(unicode);
         if (bits <= 7) {
             res.push_back(static_cast<Utf8Unit>(unicode & 0x7F));
         } else if (bits <= 11) {
