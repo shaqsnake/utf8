@@ -3,7 +3,7 @@
  * @Author: shaqsnake
  * @Email: shaqsnake@gmail.com
  * @Date: 2019-08-20 14:48:52
- * @LastEditTime: 2019-08-26 09:42:36
+ * @LastEditTime: 2019-08-31 11:37:47
  * @Description: Unittests of class utf8::Utf8.
  */
 
@@ -47,6 +47,17 @@ TEST(Utf8Tests, EncodeJapanese) {
 TEST(Utf8Tests, EncodeSymbols) {
     const std::vector<utf8::Utf8Unit> expected{0x41, 0xE2, 0x89, 0xA2, 0xCE, 0x91, 0x2E};
     utf8::Utf8 utf8;
-    const auto actual = utf8.encode({0x0041, 0x2262, 0x0391, 0x002E}); // A≢ Α.
+    const auto actual = utf8.encode({0x0041, 0x2262, 0x0391, 0x002E}); // A≢Α.
     ASSERT_EQ(expected, actual);
+}
+
+TEST(Utf8Tests, EncodeWithInvaildRange) {
+    const std::vector<utf8::Utf8Unit> replacementChar{0xEF, 0xBF, 0xBD};
+    utf8::Utf8 utf8;
+    ASSERT_EQ(replacementChar, utf8.encode({0x110000}));
+    ASSERT_EQ(replacementChar, utf8.encode({0x120000}));
+    ASSERT_EQ(replacementChar, utf8.encode({0xD800}));
+    ASSERT_EQ(replacementChar, utf8.encode({0xD801}));
+    ASSERT_EQ(replacementChar, utf8.encode({0xDFFE}));
+    ASSERT_EQ(replacementChar, utf8.encode({0xDFFF}));
 }

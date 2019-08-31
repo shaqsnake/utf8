@@ -3,7 +3,7 @@
  * @Author: shaqsnake
  * @Email: shaqsnake@gmail.com
  * @Date: 2019-08-20 14:41:29
- * @LastEditTime: 2019-08-22 15:55:39
+ * @LastEditTime: 2019-08-31 11:41:41
  * @Description: An implementation of class utf8::Utf8.
  */
 
@@ -11,6 +11,25 @@
 #include <utf8/Utf8.hpp>
 
 namespace {
+    /**
+     * Unicode replacement character (�) which is encoded as UTF-8.
+     */
+    const std::vector<utf8::Utf8Unit> UTF8_ENCODED_REPLACEMENT_CHARACTER = {0xEF, 0xBF, 0xBD};
+
+    /**
+     * The high and low surrogate halves used by UTF-16 (U+D800 through U+DFFF)
+     * and code points not encodable by UTF-16 (those after U+10FFFF) are
+     * not legal Unicode values, and their UTF-8 encoding must be treated as
+     * an invalid byte sequence.
+     */
+    const utf8::UnicodeUnit FIRST_SURROGATE = 0xD800;
+    const utf8::UnicodeUnit LAST_SURROGATE = 0xDFFF;
+
+    /**
+     * The last code point in Unicode which is legal.
+     */
+    const utf8::UnicodeUnit LAST_LEGAL_UNICODE = 0x10FFFF;
+
     /**
      * @description:
      *     Calculate how many bits in a unicode code point.
@@ -61,14 +80,20 @@ std::vector<Utf8Unit> Utf8::encode(const std::vector<UnicodeUnit> &unicodes) {
             res.push_back(static_cast<Utf8Unit>(unicode >> 6 & 0x1F) + 0xC0);
             res.push_back(static_cast<Utf8Unit>(unicode & 0x3F) + 0x80);
         } else if (bits <= 16) {
-            res.push_back(static_cast<Utf8Unit>(unicode >> 12 & 0x0F) + 0xE0);
-            res.push_back(static_cast<Utf8Unit>(unicode >> 6 & 0x3F) + 0x80);
-            res.push_back(static_cast<Utf8Unit>(unicode & 0x3F) + 0x80);
-        } else {
+            if (unicode >= FIRST_SURROGATE && unicode <= LAST_SURROGATE) {
+                res.insert(res.end(), UTF8_ENCODED_REPLACEMENT_CHARACTER.begin(), UTF8_ENCODED_REPLACEMENT_CHARACTER.end());
+            } else {
+                res.push_back(static_cast<Utf8Unit>(unicode >> 12 & 0x0F) + 0xE0);
+                res.push_back(static_cast<Utf8Unit>(unicode >> 6 & 0x3F) + 0x80);
+                res.push_back(static_cast<Utf8Unit>(unicode & 0x3F) + 0x80);
+            }
+        } else if (bits <= 21 && unicode <= LAST_LEGAL_UNICODE) {
             res.push_back(static_cast<Utf8Unit>(unicode >> 18 & 0x07)  + 0xF0);
             res.push_back(static_cast<Utf8Unit>(unicode >> 12 & 0x3F)  + 0x80);
             res.push_back(static_cast<Utf8Unit>(unicode >> 6 & 0x3F) + 0x80);
             res.push_back(static_cast<Utf8Unit>(unicode & 0x3F) + 0x80);
+        } else {
+            res.insert(res.end(), UTF8_ENCODED_REPLACEMENT_CHARACTER.begin(), UTF8_ENCODED_REPLACEMENT_CHARACTER.end());
         }
     }
 
