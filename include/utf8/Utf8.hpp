@@ -3,7 +3,7 @@
  * @Author: shaqsnake
  * @Email: shaqsnake@gmail.com
  * @Date: 2019-08-20 14:41:18
- * @LastEditTime: 2019-08-21 14:30:28
+ * @LastEditTime: 2019-08-31 14:58:01
  * @Description: A declaration of class utf8::Utf8.
  */
 
@@ -31,6 +31,8 @@ public:
 
 public:
     std::vector<Utf8Unit> encode(const std::vector<UnicodeUnit>& unicodes);
+    std::vector<UnicodeUnit> decode(const std::vector<Utf8Unit>& utf8codes);
+    std::vector<UnicodeUnit> decode(const std::string &squence);
 };
 
 

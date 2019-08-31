@@ -3,7 +3,7 @@
  * @Author: shaqsnake
  * @Email: shaqsnake@gmail.com
  * @Date: 2019-08-20 14:48:52
- * @LastEditTime: 2019-08-31 11:37:47
+ * @LastEditTime: 2019-08-31 16:14:23
  * @Description: Unittests of class utf8::Utf8.
  */
 
@@ -60,4 +60,49 @@ TEST(Utf8Tests, EncodeWithInvaildRange) {
     ASSERT_EQ(replacementChar, utf8.encode({0xD801}));
     ASSERT_EQ(replacementChar, utf8.encode({0xDFFE}));
     ASSERT_EQ(replacementChar, utf8.encode({0xDFFF}));
+}
+
+TEST(Utf8Tests, DecodeValidSequences) {
+    struct TestCase {
+        std::vector<utf8::Utf8Unit> utf8Seq;
+        std::vector<utf8::UnicodeUnit> expected;
+    };
+    std::vector<TestCase> testCases {
+        {{0x55, 0x74, 0x66, 0x2D, 0x38}, {0x55, 0x74, 0x66, 0x2D, 0x38}},
+        {{0xF0, 0xA3, 0x8E, 0xB4}, {0x233B4}},
+        {{0xE6, 0x97, 0xA5, 0xE6, 0x9C, 0xAC, 0xE8, 0xAA, 0x9E}, {0x65E5, 0x672C, 0x8A9E}},
+        {{0x41, 0xE2, 0x89, 0xA2, 0xCE, 0x91, 0x2E}, {0x0041, 0x2262, 0x0391, 0x002E}},
+    };
+
+    utf8::Utf8 utf8;
+    size_t idx = 0;
+    for (const auto testCase : testCases) {
+        auto actual = utf8.decode(testCase.utf8Seq);
+        ASSERT_EQ(testCase.expected, actual)
+            << ">>> Test is failed at " << idx << ". <<<";
+        ++idx;
+    }
+}
+
+TEST(Utf8Tests, DecodeValidString) {
+    struct TestCase {
+        std::string rawStr;
+        std::vector<utf8::UnicodeUnit> expected;
+    };
+    std::vector<TestCase> testCases {
+        {"Utf-8", {0x55, 0x74, 0x66, 0x2D, 0x38}},
+        {"𣎴", {0x233B4}},
+        {"日本語", {0x65E5, 0x672C, 0x8A9E}},
+        {"A≢Α.", {0x0041, 0x2262, 0x0391, 0x002E}},
+        {"€", {0x20AC} },
+    };
+
+    utf8::Utf8 utf8;
+    size_t idx = 0;
+    for (auto const testCase : testCases) {
+        auto actual = utf8.decode(testCase.rawStr);
+        ASSERT_EQ(testCase.expected, actual)<<
+            ">>> Test is failed at " << idx << ". <<<";
+        ++idx;
+    }
 }
