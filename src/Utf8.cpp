@@ -3,7 +3,7 @@
  * @Author: shaqsnake
  * @Email: shaqsnake@gmail.com
  * @Date: 2019-08-20 14:41:29
- * @LastEditTime: 2019-08-31 16:12:57
+ * @LastEditTime: 2019-09-10 11:24:04
  * @Description: An implementation of class utf8::Utf8.
  */
 
@@ -118,27 +118,37 @@ std::vector<UnicodeUnit> Utf8::decode(const std::vector<Utf8Unit> &utf8codes) {
     std::vector<UnicodeUnit> res;
     int remainDecoding = 0;
     UnicodeUnit curUnicode = 0x00;
-    for (auto hex : utf8codes) {
+    // for (auto hex : utf8codes) {
+    for (auto iter = utf8codes.begin(); iter != utf8codes.end(); ++iter) {
         if (remainDecoding) {
-            curUnicode <<= 6;
-            curUnicode += (hex & 0x3F);
-            remainDecoding--;
-            if (remainDecoding == 0) {
-                res.push_back(curUnicode);
+            if ((*iter & 0xC0) != 0x80) {
+                res.push_back(UNICODED_REPLACEMENT_CHARACTER);
+                remainDecoding = 0;
                 curUnicode = 0x00;
+                iter--;
+                // continue;
+            } else {
+                curUnicode <<= 6;
+                curUnicode += (*iter & 0x3F);
+                remainDecoding--;
+                if (remainDecoding == 0) {
+                    res.push_back(curUnicode);
+                    curUnicode = 0x00;
+                }
             }
         } else {
-            if ((hex & 0x80) == 0x00) { // 0xxxxxxx
-                res.push_back(hex);
-            } else if ((hex & 0xE0) == 0xC0) { // 110xxxxx 10xxxxxx
+            if ((*iter & 0x80) == 0x00) { // 0xxxxxxx
+                res.push_back(*iter);
+                remainDecoding = 0;
+            } else if ((*iter & 0xE0) == 0xC0) { // 110xxxxx 10xxxxxx
                 remainDecoding = 1;
-                curUnicode = (hex & 0x1F);
-            } else if ((hex & 0xF0) == 0xE0) { // 1110xxxx 10xxxxxx 10xxxxxx
+                curUnicode = (*iter & 0x1F);
+            } else if ((*iter & 0xF0) == 0xE0) { // 1110xxxx 10xxxxxx 10xxxxxx
                 remainDecoding = 2;
-                curUnicode = (hex & 0x1F);
-            } else if ((hex & 0xF8) == 0xF0) { // 11110xxx 10xxxxxx 10xxxxxx 10xxxxxx
+                curUnicode = (*iter & 0x1F);
+            } else if ((*iter & 0xF8) == 0xF0) { // 11110xxx 10xxxxxx 10xxxxxx 10xxxxxx
                 remainDecoding = 3;
-                curUnicode = (hex & 0x0E);
+                curUnicode = (*iter & 0x0E);
             } else {
                 res.push_back(UNICODED_REPLACEMENT_CHARACTER);
             }
